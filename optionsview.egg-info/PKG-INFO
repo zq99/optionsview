@@ -1,0 +1,86 @@
+Metadata-Version: 2.1
+Name: optionsview
+Version: 0.0.1
+Summary: Download options call/put data for any ticker in a trader friendly format
+Home-page: https://github.com/zq99/optionsview
+Author: zq99
+Author-email: zq99@hotmail.com
+License: GPL-3.0+
+Keywords: OPTIONS,STRADDLE,DATA,TRADING,CALLS,PUTS,ALGOTRADING,YFINANCE,YAHOO FINANCE,EXPIRATION DATES,SPREADS,STOCK MARKET,TICKER
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Education
+Classifier: Operating System :: Microsoft :: Windows :: Windows 10
+Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown; charset=UTF-8; variant=GFM
+License-File: LICENSE
+
+# optionsview
+
+This library downloads options data for a given symbol from yahoo finance.
+
+The data includes Calls and Puts for all future expiration dates and strike prices.
+
+There are two formats provided:
+
+- straddle view: call and put data for the same expiration and strike is side by side.
+
+- tabular view: call and put data is stacked together.
+
+
+## Installation
+
+The library requires Python 3.7 or later.  
+ 
+To install, type the following command on the python terminal:
+
+    pip install optionsview
+    
+  
+## Implementation
+
+Here is a basic example of how to download options straddle view data:
+
+    from options.data import download_options_view
+    
+    download_options_view('TSLA')
+
+The following is an example of downloading the data in a raw tabulated dataset.
+
+    from options.data import download_options_view, View
+    
+    folder = 'C:\Users\work\Documents'
+    download_options_view('TSLA', View.TABULAR, folder)
+    
+To read the data into dataframes (and not create files) you can do the following:
+
+    from options.data import get_options_view_df
+
+    straddle_df, tabular_df = get_options_view_df('TSLA')
+
+    print(straddle_df.head())
+    print(tabular_df.head())
+    
+
+## Examples
+
+The folder 'samples' in this repository, has some examples of the output from the library.
+
+
+## Contributions
+
+Contributions are welcome, all modifications should come with appropriate tests.
+
+All tests can be run by doing the following:
+
+    from testing.tests import run_all_tests
+    run_all_tests()
+
+## Acknowledgements
+
+This project makes use of the [yfinance](https://github.com/ranaroussi/yfinance) library.

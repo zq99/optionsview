@@ -1,0 +1,3 @@
+yfinance
+pandas
+numpy
