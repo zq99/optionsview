@@ -44,5 +44,21 @@ final_headers = {
     'contractSize_put': 'contract_size_put',
     'contractSymbol_put': 'contract_symbol_put',
     'lastTradeDate_put': 'last_trade_date_put',
-    'currency_put': 'currency_put'
+    'currency_put': 'currency_put',
+    'option_type': 'option_type',
+    'symbol': 'symbol',
+    'contractSymbol': 'contract_symbol',
+    'lastTradeDate': 'last_trade_date',
+    'lastPrice': 'last_price',
+    'bid': 'bid',
+    'ask': 'ask',
+    'change': 'change',
+    'percentChange': 'percent_change',
+    'volume': 'volume',
+    'openInterest': 'open_interest',
+    'impliedVolatility': 'imp_vol',
+    'inTheMoney': 'itm',
+    'contractSize': 'contract_size',
+    'currency': 'currency',
+
 }

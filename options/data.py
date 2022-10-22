@@ -82,6 +82,9 @@ def __get_options_view_data(symbol):
         puts_all_df = pd.concat(puts_df_list, axis=0, ignore_index=True)
         all_df = pd.concat([all_df, puts_all_df])
 
+    if not all_df.empty:
+        all_df['inTheMoney'] = np.where(all_df['inTheMoney'], 'Y', 'N')
+
     for df in [straddle_all_df, all_df]:
         df.rename(columns=final_headers, inplace=True)
 
