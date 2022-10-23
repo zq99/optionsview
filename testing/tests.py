@@ -7,7 +7,7 @@ from options.data import download_options_view, get_options_view_df
 from options.data import View
 from options.common import is_validated_file
 
-log = logging.getLogger("optionsview test")
+log = logging.getLogger("options - test")
 logging.basicConfig(level=logging.INFO)
 
 
@@ -53,17 +53,17 @@ class DataDownloadTestCase(unittest.TestCase):
         self.assertTrue(is_validated_file(result.straddle_file.name))
 
         output = self.get_output_filepath(None)
-        result = download_options_view('TSLA', View.TABULAR, output)
-        self.assertTrue(is_validated_file(result.tabular_file.name))
+        result = download_options_view('TSLA', View.STACKED, output)
+        self.assertTrue(is_validated_file(result.stacked_file.name))
 
         output = self.get_output_filepath(None)
         result = download_options_view('AMZN', View.ALL, output)
         self.assertTrue(result.is_complete)
 
     def run_pandas_dataframe_test(self):
-        straddle_df, tabular_df = get_options_view_df('TSLA')
+        straddle_df, stacked_df = get_options_view_df('TSLA')
 
-        df_list = [straddle_df, tabular_df]
+        df_list = [straddle_df, stacked_df]
         for df in df_list:
             self.assertTrue(isinstance(df, pd.DataFrame))
             self.assertFalse(df.empty)
@@ -71,7 +71,7 @@ class DataDownloadTestCase(unittest.TestCase):
             self.assertFalse(len(df.columns) == 0)
 
         self.assertTrue(len(straddle_df.head(3)) == 3)
-        self.assertTrue(len(tabular_df.head(5)) == 5)
+        self.assertTrue(len(stacked_df.head(5)) == 5)
 
 
 def run_all_tests():

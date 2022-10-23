@@ -6,9 +6,9 @@ The data includes Calls and Puts for all future expiration dates and strike pric
 
 There are two formats provided:
 
-- straddle view: call and put data for the same expiration and strike is side by side.
+- Straddle view: Call and Put data for the same expiration and strike is side by side.
 
-- tabular view: call and put data is stacked together.
+- Stacked view: Call and Put data is stacked together.
 
 
 ## Installation
@@ -28,21 +28,21 @@ Here is a basic example of how to download options straddle view data:
     
     download_options_view('TSLA')
 
-The following is an example of downloading the data in a raw tabulated dataset.
+The following is an example of downloading the Call and Put data in a stacked format.
 
     from options.data import download_options_view, View
     
     folder = 'C:\Users\work\Documents'
-    download_options_view('TSLA', View.TABULAR, folder)
+    download_options_view('TSLA', View.STACKED, folder)
     
 To read the data into dataframes (and not create files) you can do the following:
 
     from options.data import get_options_view_df
 
-    straddle_df, tabular_df = get_options_view_df('TSLA')
+    straddle_df, stacked_df = get_options_view_df('TSLA')
 
     print(straddle_df.head())
-    print(tabular_df.head())
+    print(stacked_df.head())
     
 
 ## Examples

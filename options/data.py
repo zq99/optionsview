@@ -10,15 +10,18 @@ from options.download import get_ticker
 from options.result import __get_result_of_output_files
 from options.headers import __straddle_headers, final_headers
 
-
 log = logging.getLogger("options - data")
 logging.basicConfig(level=logging.INFO)
 
 
 class View(Enum):
     STRADDLE = 1
-    TABULAR = 2
+    STACKED = 2
     ALL = 3
+
+
+stacked_name = 'options_chain'
+straddle_name = 'straddle'
 
 
 def __reformat(df, option_type, date, symbol):
@@ -36,7 +39,7 @@ def __get_options_view_data(symbol):
         ValueError("Please enter a symbol for the instrument")
         return
 
-    all_df = pd.DataFrame()
+    stacked_all_df = pd.DataFrame()
 
     yticker = get_ticker(symbol)
 
@@ -76,38 +79,38 @@ def __get_options_view_data(symbol):
 
     if calls_df_list:
         calls_all_df = pd.concat(calls_df_list, axis=0, ignore_index=True)
-        all_df = pd.concat([all_df, calls_all_df])
+        stacked_all_df = pd.concat([stacked_all_df, calls_all_df])
 
     if puts_df_list:
         puts_all_df = pd.concat(puts_df_list, axis=0, ignore_index=True)
-        all_df = pd.concat([all_df, puts_all_df])
+        stacked_all_df = pd.concat([stacked_all_df, puts_all_df])
 
-    if not all_df.empty:
-        all_df['inTheMoney'] = np.where(all_df['inTheMoney'], 'Y', 'N')
+    if not stacked_all_df.empty:
+        stacked_all_df['inTheMoney'] = np.where(stacked_all_df['inTheMoney'], 'Y', 'N')
 
-    for df in [straddle_all_df, all_df]:
+    for df in [straddle_all_df, stacked_all_df]:
         df.rename(columns=final_headers, inplace=True)
 
-    return straddle_all_df, all_df
+    return straddle_all_df, stacked_all_df
 
 
 def get_options_view_df(symbol):
-    straddle_view_df, all_df = __get_options_view_data(symbol)
-    return straddle_view_df, all_df
+    straddle_view_df, stacked_df = __get_options_view_data(symbol)
+    return straddle_view_df, stacked_df
 
 
 def download_options_view(symbol, viewtype=View.STRADDLE, folder=None):
     straddle_view_df, all_df = get_options_view_df(symbol)
 
-    file_name_straddle, file_name_tabular = None, None
+    file_name_straddle, file_name_stacked = None, None
 
     if viewtype == View.STRADDLE or viewtype == View.ALL:
-        file_name_straddle = get_file_name("straddle_{}".format(symbol), True, folder)
+        file_name_straddle = get_file_name("{}_{}".format(straddle_name, symbol), True, folder)
         export_df(straddle_view_df, file_name_straddle, False)
 
-    if viewtype == View.TABULAR or viewtype == View.ALL:
-        file_name_tabular = get_file_name("options_chain_{}".format(symbol), True, folder)
-        export_df(all_df, file_name_tabular, False)
+    if viewtype == View.STACKED or viewtype == View.ALL:
+        file_name_stacked = get_file_name("{}_{}".format(stacked_name, symbol), True, folder)
+        export_df(all_df, file_name_stacked, False)
 
-    result = __get_result_of_output_files(file_name_straddle, file_name_tabular)
+    result = __get_result_of_output_files(file_name_straddle, file_name_stacked)
     return result

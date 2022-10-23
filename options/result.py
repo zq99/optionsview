@@ -12,14 +12,14 @@ class Result:
     games_file and moves_file are ResultFile objects
     """
 
-    def __init__(self, is_complete, straddle_file, tabular_file):
+    def __init__(self, is_complete, straddle_file, stacked_file):
         self.is_complete = is_complete
         self.straddle_file = straddle_file
-        self.tabular_file = tabular_file
+        self.stacked_file = stacked_file
 
     def to_string(self):
         label = "{}={} {}={}"
-        return label.format(self.straddle_file.name, self.straddle_file.size, self.tabular_file.name, self.tabular_file.size)
+        return label.format(self.straddle_file.name, self.straddle_file.size, self.stacked_file.name, self.stacked_file.size)
 
     @staticmethod
     def get_empty_result():
@@ -31,13 +31,13 @@ class Result:
         """
         print("is complete: {}".format(str(self.is_complete)))
         print("straddle file: {} | size: {}".format(self.straddle_file.name, self.straddle_file.size))
-        print("tabular file: {} | size: {}".format(self.tabular_file.name, self.tabular_file.size))
+        print("stacked file: {} | size: {}".format(self.stacked_file.name, self.stacked_file.size))
 
     def get_straddle_df(self):
         return self.__get_as_dataframe(self.straddle_file.name)
 
     def get_tabular_df(self):
-        return self.__get_as_dataframe(self.tabular_file.name)
+        return self.__get_as_dataframe(self.stacked_file.name)
 
     def __get_as_dataframe(self, file):
         if self.is_complete:
@@ -60,16 +60,16 @@ class ResultFile:
         return "{}={}".format(self.name, self.size)
 
 
-def __get_result_of_output_files(straddle_file_name, tabular_file_name):
+def __get_result_of_output_files(straddle_file_name, stacked_file_name):
     result = Result.get_empty_result()
     try:
         is_straddle_file_exists = os.path.isfile(straddle_file_name) if (straddle_file_name is not None) else False
-        is_tabular_file_exists = os.path.isfile(tabular_file_name) if (tabular_file_name is not None) else False
-        is_files_exists = is_tabular_file_exists and is_straddle_file_exists
+        is_stacked_file_exists = os.path.isfile(stacked_file_name) if (stacked_file_name is not None) else False
+        is_files_exists = is_stacked_file_exists and is_straddle_file_exists
         straddle_size = __get_size(straddle_file_name) if is_straddle_file_exists else 0
-        tabular_size = __get_size(tabular_file_name) if is_tabular_file_exists else 0
+        stacked_size = __get_size(stacked_file_name) if is_stacked_file_exists else 0
         straddle_result = ResultFile(straddle_file_name, straddle_size)
-        tabular_result = ResultFile(tabular_file_name, tabular_size)
+        tabular_result = ResultFile(stacked_file_name, stacked_size)
         result = Result(is_files_exists, straddle_result, tabular_result)
     except Exception as e:
         log.error(e)
