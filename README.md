@@ -1,6 +1,6 @@
 # optionsview
 
-This library downloads options chain data for a given symbol from yahoo finance.
+This library downloads option chain data for a given symbol from yahoo finance.
 
 The data includes Calls and Puts for all future expiration dates and strike prices.
 
