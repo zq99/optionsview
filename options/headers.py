@@ -35,7 +35,7 @@ final_headers = {
     'percentChange_put': 'percent_change_put',
     'volume_put': 'volume_put',
     'openInterest_put': 'open_interest_put',
-    'impliedVolatility_put': 'imp_vol_call',
+    'impliedVolatility_put': 'imp_vol_put',
     'inTheMoney_put': 'itm_put',
     'contractSize_call': 'contract_size_call',
     'contractSymbol_call': 'contract_symbol_call',

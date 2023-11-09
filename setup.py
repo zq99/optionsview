@@ -14,7 +14,7 @@ classifiers = [
 
 setup(
     name='optionsview',
-    version='0.0.3',
+    version='0.0.4',
     packages=['options', 'testing'],
     url='https://github.com/zq99/optionsview',
     python_requires=">=3.7",
