@@ -1,6 +1,8 @@
 import logging
 import os
 import unittest
+from typing import Optional
+
 import pandas as pd
 
 from options.data import download_options_view, get_options_view_df
@@ -12,27 +14,34 @@ logging.basicConfig(level=logging.INFO)
 
 
 class DataDownloadTestCase(unittest.TestCase):
+    """Integration checks for options downloads and exported CSV files."""
+
     exports_folder_name = "exports"
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize the test case and prepare the exports folder."""
         super().__init__()
         self.setUp()
 
-    def setUp(self):
+    def setUp(self) -> None:
+        """Locate the test folder, check the exports directory and clear old exports."""
         self.folder = os.path.dirname(os.path.realpath(__file__))
         self.check_folders_exist()
         self.delete_old_test_exports()
 
-    def check_folders_exist(self):
+    def check_folders_exist(self) -> None:
+        """Check that the exports directory exists."""
         folders = [self.get_output_filepath(None)]
         for folder in folders:
             self.assertTrue(os.path.isdir(folder))
 
-    def get_output_filepath(self, output_name):
+    def get_output_filepath(self, output_name: Optional[str]) -> str:
+        """Return an export path, or the exports directory when no name is supplied."""
         name_format = '{}/{}/{}' if output_name is not None else '{}/{}'
         return name_format.format(self.folder, self.exports_folder_name, output_name)
 
-    def delete_old_test_exports(self):
+    def delete_old_test_exports(self) -> None:
+        """Change to the exports directory and delete all existing files in it."""
         output_path = self.get_output_filepath(None)
         os.chdir(output_path)
         all_files = os.listdir()
@@ -42,11 +51,13 @@ class DataDownloadTestCase(unittest.TestCase):
                 os.remove(f)
         self.assertTrue(len(os.listdir()) == 0)
 
-    def run_tests(self):
+    def run_tests(self) -> None:
+        """Run the DataFrame and file-download checks in their existing order."""
         self.run_pandas_dataframe_test()
         self.run_file_creation_test()
 
-    def run_file_creation_test(self):
+    def run_file_creation_test(self) -> None:
+        """Download straddle, stacked and combined views and check their outputs."""
         output = self.get_output_filepath(None)
 
         result = download_options_view('TSLA', View.STRADDLE, output)
@@ -60,7 +71,8 @@ class DataDownloadTestCase(unittest.TestCase):
         result = download_options_view('AMZN', View.ALL, output)
         self.assertTrue(result.is_complete)
 
-    def run_pandas_dataframe_test(self):
+    def run_pandas_dataframe_test(self) -> None:
+        """Check that both downloaded views contain tabular data."""
         straddle_df, stacked_df = get_options_view_df('TSLA')
 
         df_list = [straddle_df, stacked_df]
@@ -74,9 +86,13 @@ class DataDownloadTestCase(unittest.TestCase):
         self.assertTrue(len(stacked_df.head(5)) == 5)
 
 
-def run_all_tests():
+def run_all_tests() -> None:
     """
-    This is the main method to run to check the API output
+    Run all options download integration checks.
+
+    These checks use the configured data source and require download access.
+    Setup deletes existing files in the exports directory beside this module
+    and changes the current working directory to that directory.
     """
     log.info("Start testing")
     test_creation = DataDownloadTestCase()

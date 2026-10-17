@@ -2,7 +2,7 @@
 
 This library downloads option chain data for a given symbol from yahoo finance.
 
-The data includes Calls and Puts for all future expiration dates and strike prices.
+The library retrieves call and put data for the expiration dates and strikes available through yfinance.
 
 There are two formats provided:
 
@@ -32,7 +32,7 @@ The following is an example of downloading the Call and Put data in a stacked fo
 
     from options.data import download_options_view, View
     
-    folder = 'C:\Users\work\Documents'
+    folder = r"C:\Users\work\Documents"
     download_options_view('TSLA', View.STACKED, folder)
     
 To read the data into dataframes (and not create files) you can do the following:
@@ -58,6 +58,8 @@ All tests can be run by doing the following:
 
     from testing.tests import run_all_tests
     run_all_tests()
+
+These tests download live data and delete existing files in testing/exports before running.
 
 ## Acknowledgements
 

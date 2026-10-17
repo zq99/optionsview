@@ -1,19 +1,32 @@
 __straddle_headers = [
     'inTheMoney_call',
-    'openInterest_call', 'impliedVolatility_call',
+    'openInterest_call',
+    'impliedVolatility_call',
     'volume_call',
-    'change_call', 'percentChange_call',
-    'lastPrice_call', 'bid_call', 'ask_call',
+    'change_call',
+    'percentChange_call',
+    'lastPrice_call',
+    'bid_call',
+    'ask_call',
     'strike',
     'expire_date',
-    'bid_put', 'ask_put',
+    'bid_put',
+    'ask_put',
     'lastPrice_put',
-    'change_put', 'percentChange_put',
+    'change_put',
+    'percentChange_put',
     'volume_put',
-    'openInterest_put', 'impliedVolatility_put',
+    'openInterest_put',
+    'impliedVolatility_put',
     'inTheMoney_put',
-    'contractSize_call', 'contractSymbol_call', 'lastTradeDate_call', 'currency_call',
-    'contractSize_put', 'contractSymbol_put', 'lastTradeDate_put', 'currency_put'
+    'contractSize_call',
+    'contractSymbol_call',
+    'lastTradeDate_call',
+    'currency_call',
+    'contractSize_put',
+    'contractSymbol_put',
+    'lastTradeDate_put',
+    'currency_put'
 ]
 
 final_headers = {
@@ -60,5 +73,4 @@ final_headers = {
     'inTheMoney': 'itm',
     'contractSize': 'contract_size',
     'currency': 'currency',
-
 }

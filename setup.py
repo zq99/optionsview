@@ -1,4 +1,5 @@
 from setuptools import setup
+from pathlib import Path
 
 classifiers = [
     'Development Status :: 5 - Production/Stable',
@@ -29,7 +30,9 @@ setup(
         'pandas',
         'numpy'
     ],
-    long_description=open('README.md').read(),
-    long_description_content_type='text/markdown; charset=UTF-8; variant=GFM',
-    description='Download options call/put data for any ticker in a trader friendly format',
+    long_description=Path(__file__).with_name("README.md").read_text(
+        encoding="utf-8"
+    ),
+    long_description_content_type="text/markdown",
+    description='Download options call & put data for any ticker in a trader friendly format',
 )
