@@ -5,21 +5,28 @@ from typing import Optional
 
 import pandas as pd
 
-from options.data import download_options_view, get_options_view_df
-from options.data import View
-from options.common import is_validated_file
+from optionsview.data import download_options_view, get_options_view
+from optionsview.data import View
+from optionsview.common import is_validated_file
+from optionsview.result import OptionsViewResult
+import tempfile
+from types import SimpleNamespace
+from unittest.mock import patch
+from pathlib import Path
 
-log = logging.getLogger("options - test")
+from optionsview import data
+
+log = logging.getLogger("optionsview - test")
 logging.basicConfig(level=logging.INFO)
 
 
 class DataDownloadTestCase(unittest.TestCase):
-    """Integration checks for options downloads and exported CSV files."""
+    """Integration checks for optionsview downloads and exported CSV files."""
 
     exports_folder_name = "exports"
 
     def __init__(self) -> None:
-        """Initialize the test case and prepare the exports folder."""
+        """Initialize the test case and prepare the export folder."""
         super().__init__()
         self.setUp()
 
@@ -36,20 +43,32 @@ class DataDownloadTestCase(unittest.TestCase):
             self.assertTrue(os.path.isdir(folder))
 
     def get_output_filepath(self, output_name: Optional[str]) -> str:
-        """Return an export path, or the exports directory when no name is supplied."""
-        name_format = '{}/{}/{}' if output_name is not None else '{}/{}'
-        return name_format.format(self.folder, self.exports_folder_name, output_name)
+        """Return an export path, or the exports directory if no name is supplied."""
+        path = Path(self.folder) / self.exports_folder_name
+
+        if output_name is not None:
+            path = path / output_name
+
+        return str(path)
 
     def delete_old_test_exports(self) -> None:
-        """Change to the exports directory and delete all existing files in it."""
+        """Delete old exports while preserving .gitkeep."""
         output_path = self.get_output_filepath(None)
         os.chdir(output_path)
-        all_files = os.listdir()
-        if len(all_files) > 0:
-            for f in all_files:
-                log.info("removing old export: {}".format(f))
-                os.remove(f)
-        self.assertTrue(len(os.listdir()) == 0)
+
+        for filename in os.listdir():
+            if filename == ".gitkeep":
+                continue
+
+            log.info("removing old export: %s", filename)
+            os.remove(filename)
+
+        remaining = [
+            filename
+            for filename in os.listdir()
+            if filename != ".gitkeep"
+        ]
+        self.assertEqual(remaining, [])
 
     def run_tests(self) -> None:
         """Run the DataFrame and file-download checks in their existing order."""
@@ -73,28 +92,110 @@ class DataDownloadTestCase(unittest.TestCase):
 
     def run_pandas_dataframe_test(self) -> None:
         """Check that both downloaded views contain tabular data."""
-        straddle_df, stacked_df = get_options_view_df('TSLA')
+        result : OptionsViewResult = get_options_view('TSLA')
 
-        df_list = [straddle_df, stacked_df]
+        df_list = [result.straddle, result.stacked]
         for df in df_list:
             self.assertTrue(isinstance(df, pd.DataFrame))
             self.assertFalse(df.empty)
             self.assertFalse(len(df) == 0)
             self.assertFalse(len(df.columns) == 0)
 
-        self.assertTrue(len(straddle_df.head(3)) == 3)
-        self.assertTrue(len(stacked_df.head(5)) == 5)
+        self.assertTrue(len(result.straddle.head(3)) == 3)
+        self.assertTrue(len(result.stacked.head(5)) == 5)
 
+class OptionsViewRegressionTests(unittest.TestCase):
+    """Check exports and missing-data handling without live downloads."""
+
+    def setUp(self) -> None:
+        self.views = OptionsViewResult(
+            straddle=pd.DataFrame({"straddle_value": [1]}),
+            stacked=pd.DataFrame({"stacked_value": [2]}),
+        )
+
+    def test_all_exports_have_distinct_paths_and_correct_contents(self):
+        with tempfile.TemporaryDirectory() as folder:
+            with patch.object(
+                data, "get_options_view", return_value=self.views
+            ):
+                result = download_options_view("TEST", View.ALL, folder)
+
+            self.assertTrue(result.is_complete)
+            self.assertNotEqual(
+                result.straddle_file.name,
+                result.stacked_file.name,
+            )
+
+            pd.testing.assert_frame_equal(
+                pd.read_csv(result.straddle_file.name),
+                self.views.straddle,
+            )
+            pd.testing.assert_frame_equal(
+                pd.read_csv(result.stacked_file.name),
+                self.views.stacked,
+            )
+
+    def test_single_view_exports_are_complete(self):
+        for view, field, expected in (
+            (View.STRADDLE, "straddle_file", self.views.straddle),
+            (View.STACKED, "stacked_file", self.views.stacked),
+        ):
+            with self.subTest(view=view):
+                with tempfile.TemporaryDirectory() as folder:
+                    with patch.object(
+                        data, "get_options_view", return_value=self.views
+                    ):
+                        result = download_options_view("TEST", view, folder)
+
+                    self.assertTrue(result.is_complete)
+                    filename = getattr(result, field).name
+                    pd.testing.assert_frame_equal(
+                        pd.read_csv(filename), expected
+                    )
+
+    def test_missing_result_does_not_export(self):
+        with patch.object(data, "get_options_view", return_value=None):
+            with patch.object(data, "export_df") as export:
+                result = download_options_view("TEST")
+
+        self.assertFalse(result.is_complete)
+        export.assert_not_called()
+
+    def test_no_expirations_returns_empty_dataframes(self):
+
+        ticker = SimpleNamespace(
+            options=[],
+            get_info=lambda: {
+                "regularMarketPrice": 375.00,
+                "regularMarketTime": 1761004800,
+            },
+        )
+
+        with patch.object(data, "get_ticker", return_value=ticker):
+            result = get_options_view("TEST")
+
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result.straddle, pd.DataFrame)
+        self.assertIsInstance(result.stacked, pd.DataFrame)
+        self.assertTrue(result.straddle.empty)
+        self.assertTrue(result.stacked.empty)
 
 def run_all_tests() -> None:
-    """
-    Run all options download integration checks.
-
-    These checks use the configured data source and require download access.
-    Setup deletes existing files in the exports directory beside this module
-    and changes the current working directory to that directory.
-    """
+    """Run regression checks, followed by live download checks."""
     log.info("Start testing")
+
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(
+        OptionsViewRegressionTests
+    )
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+
+    if not result.wasSuccessful():
+        raise AssertionError("Regression tests failed")
+
     test_creation = DataDownloadTestCase()
     test_creation.run_tests()
+
     log.info("End testing")
+
+if __name__ == "__main__":
+    run_all_tests()

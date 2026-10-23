@@ -1,12 +1,13 @@
 import logging
 import os
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from pathlib import Path
+from typing import TYPE_CHECKING, List, Optional, Union, Tuple
 
 if TYPE_CHECKING:
     import pandas as pd
 
-log = logging.getLogger("options - common")
+log = logging.getLogger("optionsview - common")
 logging.basicConfig(level=logging.INFO)
 
 
@@ -16,30 +17,30 @@ def get_date_stamp() -> str:
 
 
 def get_file_name(
-    file_name: str,
-    timestamp: bool = True,
-    file_path: Optional[str] = None,
-    file_ext: str = '.csv',
+        file_name: str,
+        timestamp: bool = True,
+        file_path: Optional[str] = None,
+        file_ext: str = '.csv',
 ) -> str:
-    """Build a filename with an optional directory and local-date suffix.
+    """Build a file path with an optional directory and date suffix."""
+    if timestamp:
+        file_name = f"{file_name}_{get_date_stamp()}"
 
-    Include the leading dot in file_ext. This does not create directories.
-    """
-    full_file = (file_path + "/" + file_name) if file_path is not None else file_name
-    full_file += "_" + get_date_stamp() + file_ext if timestamp else file_ext
-    return full_file
+    path = Path(file_path) if file_path is not None else Path()
+    return str(path / f"{file_name}{file_ext}")
 
 
 def is_validated_file(
-    file_name: Union[str, List[str]], log_results: bool = True
+        file_name: Union[str, List[str]],
+        log_results: bool = True,
 ) -> bool:
-    """Return whether every supplied file exists and has a nonzero size."""
-    result, file = validate_file(file_name, log_results)
-    return result
+    valid, _ = validate_file(file_name, log_results)
+    return valid
 
 
 def validate_file(
-    file_name: Union[str, List[str]], log_result: bool = True
+        file_name: Union[str, List[str]],
+        log_result: bool = True
 ) -> Tuple[bool, Optional[Union[str, List[str]]]]:
     """Return validation status and the original input, or None on failure.
 
@@ -47,16 +48,17 @@ def validate_file(
     """
     if check_files_exist(file_name, log_result):
         if log_result:
-            log.info("file [{}] exists!".format(file_name))
+            log.info(f"file [{file_name}] exists!")
         return True, file_name
     else:
         if log_result:
-            log.error("file [{}] does NOT exist!".format(file_name))
+            log.error(f"file [{file_name}] does NOT exist!")
         return False, None
 
 
 def check_files_exist(
-    files: Union[str, List[str]], log_results: bool = True
+        files: Union[str, List[str]],
+        log_results: bool = True
 ) -> bool:
     """Check that every supplied path is a nonempty file.
 
@@ -70,12 +72,12 @@ def check_files_exist(
     for f in file_list:
         if not os.path.isfile(f):
             if log_results:
-                log.info("Expected file : " + f + " not found")
+                log.info(f"Expected file: {f} not found")
             return False
         else:
             if get_size(f) == 0:
                 if log_results:
-                    log.info("Expected file : " + f + " has no data!")
+                    log.info(f"Expected file: {f} has no data!")
                 return False
     if log_results:
         log.info("check complete")
@@ -92,7 +94,9 @@ def get_size(filename: str) -> int:
 
 
 def export_df(
-    data_df: "pd.DataFrame", file_name: str, index_required: bool = True
+        data_df: "pd.DataFrame",
+        file_name: str,
+        index_required: bool = True
 ) -> bool:
     """Export a DataFrame to CSV using UTF-8 with a byte-order mark.
 
@@ -103,7 +107,7 @@ def export_df(
         data_df.to_csv(file_name, index=index_required, encoding='utf-8-sig')
         return True
     except PermissionError:
-        log.error("unable to access existing file {}".format(file_name))
+        log.error(f"unable to access existing file {file_name}")
         return False
     except Exception as e:
         log.error(e)

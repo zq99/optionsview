@@ -15,8 +15,8 @@ classifiers = [
 
 setup(
     name='optionsview',
-    version='0.0.5',
-    packages=['options', 'testing'],
+    version='0.0.6',
+    packages=['optionsview', 'testing'],
     url='https://github.com/zq99/optionsview',
     python_requires=">=3.7",
     classifiers=classifiers,
@@ -34,5 +34,5 @@ setup(
         encoding="utf-8"
     ),
     long_description_content_type="text/markdown",
-    description='Download options call & put data for any ticker in a trader friendly format',
+    description='Download optionsview call & put data for any ticker in a trader friendly format',
 )

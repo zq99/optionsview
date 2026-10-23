@@ -1,0 +1,47 @@
+python setup.py sdistChange Log
+===============================
+
+0.0.6 (2026-10-23)
+------------------
+- BREAKING: Renamed the import package from options to optionsview.
+- BREAKING: Replaced get_options_view_df() with get_options_view().
+- BREAKING: Replaced the tuple return with an OptionsViewResult object
+  exposing straddle and stacked DataFrames.
+- Added stock_price and stock_price_retrieved_at (UTC) to both views.
+- Added stock-price retrieval validation and error handling.
+- Return None for invalid input or ticker-construction failure, and empty
+  DataFrames when no option chains are downloaded.
+- Fixed straddle and stacked exports using the same filename.
+- Fixed completion status for single-view exports and failed writes.
+- Prevented empty-data exports and reading unrequested output files.
+- Improved file-path construction using pathlib.
+- Added mocked regression tests and updated usage examples.
+- Updated test cleanup to preserve the exports folder's .gitkeep file.
+
+
+0.0.5 (2026-10-18)
+------------------
+-Maintenance release focused on code readability and documentation.
+-Added type annotations and clearer docstrings across the library and tests.
+-Improved comments and tidied internal code.
+-Preserved the existing straddle and stacked output formats.
+
+
+0.0.4 (2024-01-24)
+------------------
+-Fix to handle missing "call" data pulled from the API which causes a key error
+
+
+0.0.3 (2022-10-24)
+------------------
+-Changed 'tabular' to 'stacked' to make it more meaningful as how the data appears in the file for this format
+
+
+0.0.2 (2022-10-22)
+------------------
+-Fixed unformatted headers in the tabulated datasets
+
+
+0.0.1 (2022-10-22)
+------------------
+-First Release
